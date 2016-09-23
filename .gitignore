@@ -2,3 +2,4 @@
 *.iml
 target
 check-points
+.vagrant
