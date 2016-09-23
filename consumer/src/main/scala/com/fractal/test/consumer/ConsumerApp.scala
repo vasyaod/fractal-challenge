@@ -51,6 +51,8 @@ object ConsumerApp extends App {
     rdd.foreach { pair =>
       // Since we don't have key-value databases like HBase or Cassandra I'm using a local file system
       // where a key is a file name and value (word counter) is the contents of the file.
+
+      // And I know that rdd.foreach() can not be used in cluster but on local machine in standalone mode it is working fine.
       File("./words/" + pair._1).createFile().writeAll(pair._2.toString)
     }
   }
