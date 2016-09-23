@@ -3,3 +3,5 @@
 target
 check-points
 .vagrant
+words
+*.log
