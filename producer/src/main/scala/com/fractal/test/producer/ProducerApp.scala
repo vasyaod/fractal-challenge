@@ -7,7 +7,8 @@ import akka.util.ByteString
 import com.typesafe.scalalogging.LazyLogging
 import io.scalac.amqp.{Connection, Message, Queue}
 
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Random, Success}
+import scala.concurrent.duration._
 
 object ProducerApp extends App with LazyLogging {
 
@@ -17,10 +18,12 @@ object ProducerApp extends App with LazyLogging {
 
   val words = Vector("word1", "word2", "word3", "word4", "word5", "word6", "word7", "word8", "word9", "word10")
 
-//  val frases = (0 to 1000).map { _ =>
-//    val wordNum = Random.nextInt(10)
-//    (0 to wordNum - 1).
-//  }
+  def generatePhrase(): String = {
+    val phraseLen = Random.nextInt(10) + 1
+    (1 to phraseLen)
+      .map ( _ => words(Random.nextInt(words.size)))
+      .mkString(" ")
+  }
 
   // All connection data is within the application.conf
   val rabbitConnection = Connection()
@@ -33,7 +36,9 @@ object ProducerApp extends App with LazyLogging {
     case Success(_) =>
 
       // Our queue was created successfully.
-      Source (words)
+      Source.tick(initialDelay = 1.second, interval = 1.second, tick = ())
+        .map(_ => generatePhrase())
+        .log("tick")
         .map(msg => Message(ByteString(msg)))
         .runWith(Sink.fromSubscriber(rabbitConnection.publishDirectly("queue1")))
 
